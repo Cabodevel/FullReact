@@ -2,14 +2,18 @@ import Usuario from "../models/Usuario.js";
 import createId from "../helpers/createId.js";
 import genJwt from "../helpers/jwtGen.js";
 
+import {
+  userExistsByToken,
+  userExistsByEmail,
+} from "../services/userService.js";
+
 const registrar = async (req, res) => {
   try {
     const { email } = req.body;
-    const existingUser = await Usuario.findOne({ email });
+    const existingUser = await userExistsByEmail(email);
 
-    if (existingUser) {
-      const error = new Error("User already exist");
-      return res.status(400).json({ message: error.message });
+    if (!existingUser.exists) {
+      return res.status(400).json({ message: existingUser.errorMessage });
     }
 
     const usuario = new Usuario(req.body);
@@ -27,12 +31,13 @@ const autenticar = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const existingUser = await Usuario.findOne({ email });
+    const findUser = await userExistsByEmail(email);
 
-    if (!existingUser) {
-      const error = new Error("User does not exist");
-      return res.status(400).json({ message: error.message });
+    if (!findUser.exists) {
+      return res.status(400).json({ message: existingUser.errorMessage });
     }
+
+    const { existingUser } = findUser;
 
     if (!existingUser.confirmado) {
       const error = new Error("User is not confirmed");
@@ -60,12 +65,13 @@ const autenticar = async (req, res) => {
 const confirmar = async (req, res) => {
   const { token } = req.params;
 
-  const userConfirm = await Usuario.findOne({ token });
+  const findUser = await userExistsByToken(token);
 
-  if (!userConfirm) {
-    const error = new Error("Invalid token");
-    return res.status(400).json({ message: error.message });
+  if (!findUser.exists) {
+    return res.status(400).json({ message: userConfirm.errorMessage });
   }
+
+  const { userConfirm } = findUser;
 
   try {
     userConfirm.confirmado = true;
@@ -81,4 +87,44 @@ const confirmar = async (req, res) => {
   });
 };
 
-export { registrar, autenticar, confirmar };
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const findUser = await userExistsByEmail(email);
+
+  if (!findUser.exists) {
+    return res.status(400).json({ message: existingUser.errorMessage });
+  }
+
+  const { existingUser } = findUser;
+
+  try {
+    existingUser.token = createId();
+    await existingUser.save();
+    res.json({
+      msg: "We've sent an email with instructions to reset your password",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const forgotPasswordRecovery = async (req, res) => {
+  const { token } = req.body;
+
+  const findUser = await userExistsByToken(token);
+
+  if (findUser.exists) {
+    res.json("valid user and token");
+  } else {
+    return res.status(404).json({ message: existingUser.errorMessage });
+  }
+};
+
+export {
+  registrar,
+  autenticar,
+  confirmar,
+  forgotPassword,
+  forgotPasswordRecovery,
+};
