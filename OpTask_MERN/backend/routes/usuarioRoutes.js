@@ -1,10 +1,16 @@
 import express from "express";
 
-import { registrar } from "../controllers/usuarioController.js";
+import {
+  autenticar,
+  confirmar,
+  registrar,
+} from "../controllers/usuarioController.js";
 
 const router = express.Router();
 
 //Auth
 router.post("/", registrar);
+router.post("/login", autenticar);
+router.get("/confirmar/:token", confirmar);
 
 export default router;
