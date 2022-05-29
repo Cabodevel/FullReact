@@ -3,17 +3,21 @@ import Usuario from "../models/Usuario.js";
 const registrar = async (req, res) => {
   try {
     const { email } = req.body;
-    const existingUser = Usuario.find({ email });
+    const existingUser = await Usuario.findOne({ email });
 
-    if (existingUser) return res.json({ msg: "User already exists" });
+    if (existingUser) {
+      const error = new Error("User already exist");
+      return res.status(400).json({ message: error.message });
+    }
 
     const usuario = new Usuario(req.body);
 
     const usuarioGuardado = await usuario.save();
 
     res.json(usuarioGuardado);
-  } catch (error) {}
-  res.json({ error });
+  } catch (error) {
+    res.json({ message: error.message });
+  }
 };
 
 export { registrar };
