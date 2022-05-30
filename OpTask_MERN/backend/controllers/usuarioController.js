@@ -115,11 +115,34 @@ const forgotPasswordRecovery = async (req, res) => {
   const findUser = await userExistsByToken(token);
 
   if (findUser.exists) {
-    res.json("valid user and token");
+    res.json({ msg: "Valid user and token" });
   } else {
     return res.status(404).json({ message: existingUser.errorMessage });
   }
 };
+
+const newPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const findUser = await userExistsByToken(token);
+
+  if (findUser.exists) {
+    usuario.password = password;
+    usuario.token = "";
+
+    try {
+      await usuario.save();
+      res.json({ msg: "Password changed!" });
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    return res.status(404).json({ message: existingUser.errorMessage });
+  }
+};
+
+const profile = (req, res) => {};
 
 export {
   registrar,
@@ -127,4 +150,6 @@ export {
   confirmar,
   forgotPassword,
   forgotPasswordRecovery,
+  newPassword,
+  profile,
 };
