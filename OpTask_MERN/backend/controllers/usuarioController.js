@@ -142,7 +142,9 @@ const newPassword = async (req, res) => {
   }
 };
 
-const profile = (req, res) => {};
+const profile = (req, res) => {
+  return res.status(200).json({ usuario: req.usuario });
+};
 
 export {
   registrar,

@@ -6,6 +6,7 @@ import {
   forgotPasswordRecovery,
   registrar,
   profile,
+  newPassword,
 } from "../controllers/usuarioController.js";
 
 import checkAuth from "../middleware/checkAuth.js";
@@ -20,6 +21,6 @@ router.post("/forgot-password", forgotPassword);
 router.get("/forgot-password/:token", forgotPasswordRecovery);
 router.post("/forgot-password/:token", newPassword);
 router.get("/confirmar/:token", confirmar);
-router, get("/profile", checkAuth, profile);
+router.get("/profile", checkAuth, profile);
 
 export default router;
