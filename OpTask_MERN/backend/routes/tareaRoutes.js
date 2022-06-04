@@ -1,5 +1,6 @@
 import express from "express";
-import { NotBeforeError } from "jsonwebtoken";
+import checkAuth from "../middleware/checkAuth.js";
+
 import {
   agregarTarea,
   obtenerTarea,
@@ -7,7 +8,6 @@ import {
   eliminarTarea,
   cambiarEstado,
 } from "../controllers/tareaController.js";
-import checkAuth from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
@@ -20,4 +20,5 @@ router
   .delete(checkAuth, eliminarTarea);
 
 router.patch("/estado/:id", checkAuth, cambiarEstado);
+
 export default router;
