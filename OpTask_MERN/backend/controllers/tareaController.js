@@ -1,5 +1,5 @@
-import Proyecto from "../models/Proyecto";
-import Tarea from "../models/Tarea";
+import Proyecto from "../models/Proyecto.js";
+import Tarea from "../models/Tarea.js";
 
 const agregarTarea = async (req, res) => {
   const { proyecto } = req.body;

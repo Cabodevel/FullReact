@@ -12,18 +12,20 @@ const registrar = async (req, res) => {
     const { email } = req.body;
     const existingUser = await userExistsByEmail(email);
 
-    if (!existingUser.exists) {
-      return res.status(400).json({ message: existingUser.errorMessage });
+    if (existingUser.exists) {
+      return res
+        .status(400)
+        .json({ message: "El usuario ya existe", error: true });
     }
 
     const usuario = new Usuario(req.body);
     usuario.token = createId();
 
-    const usuarioGuardado = await usuario.save();
+    await usuario.save();
 
-    res.json(usuarioGuardado);
+    res.json({ message: "Usuario creado", error: false });
   } catch (error) {
-    res.json({ message: error.message });
+    res.json({ message: error.message, error: true });
   }
 };
 
