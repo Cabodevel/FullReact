@@ -1,12 +1,93 @@
-const obtenerProyectos = async (req, res) => {};
+import Proyecto from "../models/Proyecto.js";
 
-const nuevoProyecto = async (req, res) => {};
+const obtenerProyectos = async (req, res) => {
+  const proyectos = await Proyecto.find().where("creador").equals(req.usuario);
+  return res.json(proyectos);
+};
 
-const obtenerProyecto = async (req, res) => {};
+const nuevoProyecto = async (req, res) => {
+  const proyecto = new Proyecto(req.body);
+  proyecto.creador = req.usuario._id;
 
-const editarProyecto = async (req, res) => {};
+  try {
+    const savedProyecto = await proyecto.save();
+    res.json(savedProyecto);
+  } catch (error) {
+    console.log(error);
+  }
 
-const eliminarProyecto = async (req, res) => {};
+  console.log(req.body);
+};
+
+const obtenerProyecto = async (req, res) => {
+  const { id } = req.params;
+
+  const proyecto = await Proyecto.findById(id);
+
+  if (!proyecto) {
+    const error = new Error("Not found");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("Not Unauthorized");
+    return res.status(401).json({ msg: error.message });
+  }
+
+  return res.json(proyecto);
+};
+
+const editarProyecto = async (req, res) => {
+  const { id } = req.params;
+
+  const proyecto = await Proyecto.findById(id);
+
+  if (!proyecto) {
+    const error = new Error("Not found");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("Not Unauthorized");
+    return res.status(401).json({ msg: error.message });
+  }
+
+  proyecto.nombre = req.body.nombre || proyecto.nombre;
+  proyecto.descripcion = req.body.descripcion || proyecto.descripcion;
+  proyecto.nombre = req.body.fechaEntrega || proyecto.fechaEntrega;
+  proyecto.nombre = req.body.cliente || proyecto.cliente;
+
+  try {
+    const proyectoAlmacenado = await proyecto.save();
+
+    res.json(proyectoAlmacenado);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const eliminarProyecto = async (req, res) => {
+  const { id } = req.params;
+
+  const proyecto = await Proyecto.findById(id);
+
+  if (!proyecto) {
+    const error = new Error("Not found");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("Not Unauthorized");
+    return res.status(401).json({ msg: error.message });
+  }
+
+  try {
+    await proyecto.deleteOne();
+    return res.json({ msg: "Proyecto eliminado" });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const agregarColaborador = async (req, res) => {};
 
