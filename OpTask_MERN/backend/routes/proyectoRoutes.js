@@ -13,10 +13,7 @@ import {
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(checkAuth, obtenerProyectos)
-  .post(checkAuth, nuevoProyecto);
+router.route.post("/", checkAuth, nuevoProyecto);
 
 router
   .route("/:id")
