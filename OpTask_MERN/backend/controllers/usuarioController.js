@@ -1,6 +1,7 @@
 import Usuario from "../models/Usuario.js";
 import createId from "../helpers/createId.js";
 import genJwt from "../helpers/jwtGen.js";
+import { emailRegister } from "../helpers/emails.js";
 
 import {
   userExistsByToken,
@@ -22,6 +23,12 @@ const registrar = async (req, res) => {
     usuario.token = createId();
 
     await usuario.save();
+
+    emailRegister({
+      email: usuario.email,
+      nombre: usuario.nombre,
+      token: usuario.token,
+    });
 
     res.json({ message: "Usuario creado", error: false });
   } catch (error) {
@@ -70,23 +77,19 @@ const confirmar = async (req, res) => {
   const findUser = await userExistsByToken(token);
 
   if (!findUser.exists) {
-    return res.status(400).json({ message: userConfirm.errorMessage });
+    return res.status(400).json({ message: "User does not exist" });
   }
 
-  const { userConfirm } = findUser;
+  const { existingUser } = findUser;
 
   try {
-    userConfirm.confirmado = true;
-    userConfirm.token = "";
-    await userConfirm.save();
-    res.json({ msg: "User confirmed" });
+    existingUser.confirmado = true;
+    existingUser.token = "";
+    await existingUser.save();
+    res.json({ message: "User confirmed" });
   } catch (error) {
     console.log(error);
   }
-
-  res.json({
-    token,
-  });
 };
 
 const forgotPassword = async (req, res) => {
@@ -103,23 +106,29 @@ const forgotPassword = async (req, res) => {
   try {
     existingUser.token = createId();
     await existingUser.save();
-    res.json({
-      msg: "We've sent an email with instructions to reset your password",
+
+    // TODO send email
+
+    return res.json({
+      message: "We've sent an email with instructions to reset your password",
+      error: false,
     });
   } catch (error) {
-    console.log(error);
+    return res.json({ message: error.message, error: true });
   }
 };
 
 const forgotPasswordRecovery = async (req, res) => {
-  const { token } = req.body;
+  const { token } = req.params;
 
   const findUser = await userExistsByToken(token);
 
   if (findUser.exists) {
-    res.json({ msg: "Valid user and token" });
+    res.json({ message: "Valid user and token", error: false });
   } else {
-    return res.status(404).json({ message: existingUser.errorMessage });
+    return res
+      .status(404)
+      .json({ message: "User does not exists", error: true });
   }
 };
 
@@ -135,7 +144,7 @@ const newPassword = async (req, res) => {
 
     try {
       await usuario.save();
-      res.json({ msg: "Password changed!" });
+      res.json({ message: "Password changed!", success: true });
     } catch (error) {
       console.log(error);
     }

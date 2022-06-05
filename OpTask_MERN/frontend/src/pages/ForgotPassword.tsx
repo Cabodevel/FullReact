@@ -1,12 +1,44 @@
+import axios from "axios";
+import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
+import Alert, { IAlert } from "../components/Alert";
+
 function ForgotPassword() {
+  const [email, setEmail] = useState("");
+  const [alert, setAlert] = useState<IAlert | undefined>();
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (email === "") {
+      setAlert({ message: "Email es obligatorio", error: true });
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/usuarios/forgot-password`,
+        { email }
+      );
+
+      const { message, error } = data;
+      setAlert({ message, error });
+    } catch (error: any) {
+      const { message } = error.response.data;
+      setAlert({ message, error: true });
+    }
+  };
   return (
     <>
       <h1 className="text-sky-600 font-black text-6xl capitalize">
         Recupera tu cuenta y administra tus
         <span className="text-slate-700"> proyectos</span>
       </h1>
-      <form className="my-10 bg-white shadow rounded-lg p-10">
+      {alert && <Alert {...alert} />}
+      <form
+        className="my-10 bg-white shadow rounded-lg p-10"
+        onSubmit={handleSubmit}
+      >
         <div className="my-5">
           <label
             className="uppercase text-gray-600 block text-xl font-bold"
@@ -19,6 +51,8 @@ function ForgotPassword() {
             id="email"
             placeholder="Email de registro"
             className="w-full mt-3 p-3 border rounded-xl bg-gray-50"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           ></input>
         </div>
         <input
