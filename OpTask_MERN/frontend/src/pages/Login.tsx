@@ -17,7 +17,7 @@ function Login() {
 
   const [loginData, setloginData] = useState(defaultLogin);
   const [alert, setAlert] = useState<IAlert | undefined>();
-  const { auth, setAuth, isLoading } = useAuth();
+  const { setAuth } = useAuth();
 
   const handleChange = <P extends keyof Login>(name: P, value: Login[P]) => {
     setloginData({
@@ -42,6 +42,11 @@ function Login() {
       if (data.token) {
         setAlert(undefined);
         localStorage.setItem("token", data.token);
+        setAuth({
+          _id: data._id,
+          nombre: data.nombre,
+          email: data.email,
+        });
       }
     } catch (error: any) {
       setAlert({ message: error.response.data.message, error: true });

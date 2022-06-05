@@ -1,4 +1,5 @@
 import { useEffect, useState, createContext, FC, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosClient from "../config/axiosClient";
 
 interface ContextState {
@@ -10,7 +11,7 @@ interface ContextState {
 interface IAuthContext {
   auth?: ContextState;
   isLoading: boolean;
-  setAuth?: (auth: ContextState) => void;
+  setAuth: (auth: ContextState) => void;
 }
 
 const initialState = {
@@ -20,6 +21,7 @@ const initialState = {
     email: "",
   },
   isLoading: true,
+  setAuth: () => {},
 };
 
 const AuthContext = createContext<IAuthContext>(initialState);
@@ -37,16 +39,11 @@ const AuthProvider: FC<IAuthProvider> = ({ children }) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const ctx: IAuthContext = {
-    auth,
-    isLoading,
-    setAuth,
-  };
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const authenticateUser = async () => {
-      const token = localStorage.getItem("token");
-
       if (!token) {
         setIsLoading(false);
         return;
@@ -61,18 +58,17 @@ const AuthProvider: FC<IAuthProvider> = ({ children }) => {
 
       try {
         const { data } = await axiosClient("/usuarios/profile", config);
-
         setAuth({ ...data.usuario });
+        navigate("/proyectos");
       } catch (error) {
         setAuth(undefined);
         console.log(error);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     authenticateUser();
-  }, []);
+  }, [token]);
 
   return (
     <AuthContext.Provider value={{ auth, isLoading, setAuth }}>
