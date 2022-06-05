@@ -43,13 +43,13 @@ const autenticar = async (req, res) => {
     const findUser = await userExistsByEmail(email);
 
     if (!findUser.exists) {
-      return res.status(400).json({ message: existingUser.errorMessage });
+      return res.status(400).json({ message: "El usuario no existe" });
     }
 
     const { existingUser } = findUser;
 
     if (!existingUser.confirmado) {
-      const error = new Error("User is not confirmed");
+      const error = new Error("El usuario no está confirmado");
       return res.status(400).json({ message: error.message });
     }
 
@@ -63,7 +63,7 @@ const autenticar = async (req, res) => {
         token: genJwt(existingUser._id),
       });
     } else {
-      const error = new Error("Incorrect password");
+      const error = new Error("Contraseña incorrecta");
       return res.status(400).json({ message: error.message });
     }
   } catch (error) {

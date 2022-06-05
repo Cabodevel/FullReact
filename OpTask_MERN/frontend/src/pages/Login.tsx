@@ -1,13 +1,61 @@
-import { Link } from "react-router-dom";
+import { useState, FormEvent, ChangeEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Alert, { IAlert } from "../components/Alert";
+import axiosClient from "../config/axiosClient";
+
+interface Login {
+  email: string;
+  password: string;
+}
 
 function Login() {
+  const defaultLogin = {
+    email: "",
+    password: "",
+  };
+
+  const [loginData, setloginData] = useState(defaultLogin);
+  const [alert, setAlert] = useState<IAlert | undefined>();
+
+  const handleChange = <P extends keyof Login>(name: P, value: Login[P]) => {
+    setloginData({
+      ...loginData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if ([loginData.email, loginData.password].includes("")) {
+      setAlert({ message: "Todos los campos son obligatorios", error: true });
+      return;
+    }
+
+    try {
+      const { data } = await axiosClient.post("/usuarios/login", {
+        ...loginData,
+      });
+
+      if (data.token) {
+        setAlert(undefined);
+        localStorage.setItem("token", data.token);
+      }
+    } catch (error: any) {
+      setAlert({ message: error.response.data.message, error: true });
+    }
+  };
   return (
     <>
       <h1 className="text-sky-600 font-black text-6xl capitalize">
         Inicia sesión y administra tus
         <span className="text-slate-700"> proyectos</span>
       </h1>
-      <form className="my-10 bg-white shadow rounded-lg p-10">
+      {alert && <Alert {...alert} />}
+      <form
+        className="my-10 bg-white shadow rounded-lg p-10"
+        onSubmit={handleSubmit}
+      >
         <div className="my-5">
           <label
             className="uppercase text-gray-600 block text-xl font-bold"
@@ -20,6 +68,8 @@ function Login() {
             id="email"
             placeholder="Email de registro"
             className="w-full mt-3 p-3 border rounded-xl bg-gray-50"
+            value={loginData.email}
+            onChange={(e) => handleChange("email", e.target.value)}
           ></input>
         </div>
         <div className="my-5">
@@ -34,6 +84,8 @@ function Login() {
             id="password"
             placeholder="Tu password"
             className="w-full mt-3 p-3 border rounded-xl bg-gray-50"
+            value={loginData.password}
+            onChange={(e) => handleChange("password", e.target.value)}
           ></input>
         </div>
         <input
