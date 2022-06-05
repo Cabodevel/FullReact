@@ -5,11 +5,11 @@ import Alert, { IAlert } from "../components/Alert";
 
 function NewPassword() {
   const params = useParams();
-  console.log(params);
   const { token } = params;
   const [alert, setAlert] = useState<IAlert | undefined>();
   const [isValidToken, setIsValidToken] = useState(false);
   const [password, setPassword] = useState("");
+  const [passwordChanged, setpasswordChanged] = useState(false);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -21,14 +21,12 @@ function NewPassword() {
         );
 
         const { error, message } = data;
-
         if (error) {
           setAlert({ error, message });
-          return;
         }
-        setIsValidToken(true);
+        setIsValidToken(!error);
       } catch (error: any) {
-        setAlert({ error: true, message: error.message });
+        setAlert({ error: true, message: error.response.data.message });
       }
     };
 
@@ -37,13 +35,34 @@ function NewPassword() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (password.length < 6) {
+      setAlert({ message: "Password must be > 6 ", error: true });
+      return;
+    }
+
+    try {
+      const url = `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/usuarios/forgot-password/${token}`;
+      const { data } = await axios.post(url, { password });
+
+      const isSuccess = !data.error;
+      setpasswordChanged(isSuccess);
+      setIsValidToken(!isSuccess);
+
+      setAlert(data);
+    } catch (error: any) {
+      setAlert({ error: true, message: error.response.data.message });
+    }
   };
   return (
     <>
       <h1 className="text-sky-600 font-black text-6xl capitalize">
         Restablecer password
       </h1>
-      {isValidToken ? (
+      {alert && <Alert {...alert} />}
+      {isValidToken && !alert && (
         <form
           className="my-10 bg-white shadow rounded-lg p-10"
           onSubmit={handleSubmit}
@@ -70,8 +89,14 @@ function NewPassword() {
             className="mb-5 bg-sky-700 w-full py-3 text-white uppercase font-bold rounded hover:cursor-pointer hover:bg-sky-800 transition-colors"
           ></input>
         </form>
-      ) : (
-        alert && <Alert {...alert} />
+      )}
+      {passwordChanged && (
+        <Link
+          className="block text-center my-5 text-slate-500 uppercase text-sm"
+          to="/"
+        >
+          Iniciar Sesión
+        </Link>
       )}
     </>
   );

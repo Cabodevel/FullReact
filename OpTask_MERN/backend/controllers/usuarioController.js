@@ -128,7 +128,7 @@ const forgotPasswordRecovery = async (req, res) => {
   } else {
     return res
       .status(404)
-      .json({ message: "User does not exists", error: true });
+      .json({ message: "User does not exist", error: true });
   }
 };
 
@@ -139,17 +139,20 @@ const newPassword = async (req, res) => {
   const findUser = await userExistsByToken(token);
 
   if (findUser.exists) {
-    usuario.password = password;
-    usuario.token = "";
+    const { existingUser } = findUser;
+    existingUser.password = password;
+    existingUser.token = "";
 
     try {
-      await usuario.save();
-      res.json({ message: "Password changed!", success: true });
+      await existingUser.save();
+      res.json({ message: "Password changed!", error: false });
     } catch (error) {
-      console.log(error);
+      return res.status(500).json({ message: error.message, error: true });
     }
   } else {
-    return res.status(404).json({ message: existingUser.errorMessage });
+    return res
+      .status(404)
+      .json({ message: "User does not exist", error: true });
   }
 };
 
