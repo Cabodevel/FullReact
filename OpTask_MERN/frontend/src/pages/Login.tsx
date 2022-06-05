@@ -1,7 +1,8 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Alert, { IAlert } from "../components/Alert";
 import axiosClient from "../config/axiosClient";
+import useAuth from "../hooks/useAuth";
 
 interface Login {
   email: string;
@@ -16,6 +17,7 @@ function Login() {
 
   const [loginData, setloginData] = useState(defaultLogin);
   const [alert, setAlert] = useState<IAlert | undefined>();
+  const { auth, setAuth, isLoading } = useAuth();
 
   const handleChange = <P extends keyof Login>(name: P, value: Login[P]) => {
     setloginData({
