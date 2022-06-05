@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
 import Alert, { IAlert } from "../components/Alert";
+import axiosClient from "../config/axiosClient";
 
 function NewPassword() {
   const params = useParams();
@@ -14,10 +14,8 @@ function NewPassword() {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const { data } = await axios(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/usuarios/forgot-password/${token}`
+        const { data } = await axiosClient(
+          `/usuarios/forgot-password/${token}`
         );
 
         const { error, message } = data;
@@ -42,10 +40,8 @@ function NewPassword() {
     }
 
     try {
-      const url = `${
-        import.meta.env.VITE_BACKEND_URL
-      }/api/usuarios/forgot-password/${token}`;
-      const { data } = await axios.post(url, { password });
+      const url = `/usuarios/forgot-password/${token}`;
+      const { data } = await axiosClient.post(url, { password });
 
       const isSuccess = !data.error;
       setpasswordChanged(isSuccess);

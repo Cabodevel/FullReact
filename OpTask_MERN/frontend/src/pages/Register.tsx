@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import Alert, { IAlert } from "../components/Alert";
-import axios, { AxiosError } from "axios";
+import axiosClient from "../config/axiosClient";
 
 function Register() {
   const [nombre, setNombre] = useState("");
@@ -30,14 +30,11 @@ function Register() {
     setAlert(undefined);
 
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/usuarios`,
-        {
-          nombre,
-          password,
-          email,
-        }
-      );
+      const { data } = await axiosClient.post(`/usuarios`, {
+        nombre,
+        password,
+        email,
+      });
       setAlert(data);
       resetForm();
     } catch (err: any) {

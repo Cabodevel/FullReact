@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosClient from "../config/axiosClient";
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import Alert, { IAlert } from "../components/Alert";
@@ -16,10 +16,9 @@ function ForgotPassword() {
     }
 
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/usuarios/forgot-password`,
-        { email }
-      );
+      const { data } = await axiosClient.post(`/usuarios/forgot-password`, {
+        email,
+      });
 
       const { message, error } = data;
       setAlert({ message, error });
