@@ -52,6 +52,7 @@ function Login() {
       setAlert({ message: error.response.data.message, error: true });
     }
   };
+
   return (
     <>
       <h1 className="text-sky-600 font-black text-6xl capitalize">
